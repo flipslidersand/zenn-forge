@@ -1,0 +1,19 @@
+ollama:
+  base_url: "http://localhost:11434"
+  model: "qwen2.5:7b"
+  timeout: 120
+
+scout:
+  db_path: "../zenn-scout/data/zenn.db"
+
+generation:
+  style: "tutorial"
+  min_likes_threshold: 20
+  topics:
+    - rust
+    - go
+    - python
+    - ai
+
+zenn_content:
+  repo_path: "../zenn-content"
