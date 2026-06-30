@@ -28,8 +28,10 @@ jobs:
           .venv/bin/pip install -e . -q
 
       - name: Fetch latest Zenn trends
+        env:
+          SCOUT_DIR: /home/dev-nodee/projects/flipslidersand/zenn-scout
         run: |
-          cd ../zenn-scout
+          cd "$SCOUT_DIR"
           .venv/bin/zenn-scout fetch --topics rust,go,python,ai --pages 3
         continue-on-error: true
 
@@ -37,6 +39,8 @@ jobs:
         env:
           TOPICS: ${{ github.event.inputs.topics }}
           CREATE_PR: ${{ github.event.inputs.create_pr || 'true' }}
+          ZENN_SCOUT_DB: /home/dev-nodee/projects/flipslidersand/zenn-scout/data/zenn.db
+          ZENN_CONTENT_REPO: /home/dev-nodee/projects/flipslidersand/zenn-content
         run: |
           ARGS=""
           if [ -n "$TOPICS" ]; then ARGS="--topics $TOPICS"; fi
