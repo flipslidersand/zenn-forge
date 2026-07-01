@@ -39,11 +39,13 @@ def write_article(content_repo: str | Path, title: str, emoji: str, body: str, t
 
 
 def create_pr(content_repo: str | Path, filepath: Path, title: str) -> str:
-    repo = Path(content_repo)
+    repo = Path(content_repo).resolve()
     branch = f"draft/{filepath.stem}"
+    # git add にはリポジトリ内の相対パスを渡す
+    rel_path = str(filepath.resolve().relative_to(repo))
 
     subprocess.run(["git", "-C", str(repo), "checkout", "-b", branch], check=True)
-    subprocess.run(["git", "-C", str(repo), "add", str(filepath)], check=True)
+    subprocess.run(["git", "-C", str(repo), "add", rel_path], check=True)
     subprocess.run(
         ["git", "-C", str(repo), "commit", "-m", f"draft: {title}"],
         check=True,
