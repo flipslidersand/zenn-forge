@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 def _slug(title: str) -> str:
-    s = re.sub(r"[^\w\s-]", "", title.lower())
+    s = re.sub(r"[^a-z0-9\s-]", "", title.lower())
     s = re.sub(r"[\s_]+", "-", s)
     return s[:40].strip("-") or "article"
 
