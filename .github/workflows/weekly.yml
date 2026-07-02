@@ -9,6 +9,10 @@ on:
         description: "トピック (カンマ区切り、省略時は config.yaml)"
         required: false
         default: ""
+      template:
+        description: "テンプレート (tutorial/roadmap/resources/showcase/auto)"
+        required: false
+        default: "auto"
       create_pr:
         description: "PR を作成する"
         type: boolean
@@ -35,15 +39,35 @@ jobs:
           .venv/bin/zenn-scout fetch --topics rust,go,python,ai --pages 3
         continue-on-error: true
 
+      - name: Determine template (rotation)
+        id: template
+        run: |
+          INPUT="${{ github.event.inputs.template }}"
+          if [ "$INPUT" = "auto" ] || [ -z "$INPUT" ]; then
+            WEEK=$(date +%V)
+            IDX=$((10#$WEEK % 4))
+            case $IDX in
+              0) TMPL="tutorial" ;;
+              1) TMPL="roadmap" ;;
+              2) TMPL="resources" ;;
+              3) TMPL="showcase" ;;
+            esac
+          else
+            TMPL="$INPUT"
+          fi
+          echo "template=$TMPL" >> $GITHUB_OUTPUT
+          echo "今週のテンプレート: $TMPL"
+
       - name: Generate article drafts
         env:
           TOPICS: ${{ github.event.inputs.topics }}
           CREATE_PR: ${{ github.event.inputs.create_pr || 'true' }}
+          TEMPLATE: ${{ steps.template.outputs.template }}
           ZENN_SCOUT_DB: /home/dev-nodee/projects/flipslidersand/zenn-scout/data/zenn.db
           ZENN_CONTENT_REPO: /home/dev-nodee/projects/flipslidersand/zenn-content
         run: |
-          ARGS=""
-          if [ -n "$TOPICS" ]; then ARGS="--topics $TOPICS"; fi
+          ARGS="--template $TEMPLATE"
+          if [ -n "$TOPICS" ]; then ARGS="$ARGS --topics $TOPICS"; fi
           if [ "$CREATE_PR" = "true" ]; then ARGS="$ARGS --pr"; fi
           .venv/bin/zenn-forge run $ARGS
 
@@ -52,6 +76,7 @@ jobs:
         run: |
           echo "## 実行結果" >> $GITHUB_STEP_SUMMARY
           echo "- 日時: $(date '+%Y-%m-%d %H:%M JST')" >> $GITHUB_STEP_SUMMARY
+          echo "- テンプレート: ${{ steps.template.outputs.template }}" >> $GITHUB_STEP_SUMMARY
           echo "- モデル: qwen2.5:7b" >> $GITHUB_STEP_SUMMARY
-          DRAFTS=$(ls ../zenn-content/articles/*.md 2>/dev/null | wc -l)
+          DRAFTS=$(ls /home/dev-nodee/projects/flipslidersand/zenn-content/articles/*.md 2>/dev/null | wc -l)
           echo "- zenn-content 記事数: $DRAFTS" >> $GITHUB_STEP_SUMMARY

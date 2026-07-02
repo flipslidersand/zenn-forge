@@ -76,7 +76,7 @@ def main() -> None:
 
     p_run = sub.add_parser("run", help="記事ドラフトを生成")
     p_run.add_argument("--topics", help="カンマ区切りトピック（省略時は config.yaml）")
-    p_run.add_argument("--template", default="tutorial", choices=["tutorial", "roadmap"], help="テンプレート種別")
+    p_run.add_argument("--template", default="tutorial", choices=["tutorial", "roadmap", "resources", "showcase"], help="テンプレート種別")
     p_run.add_argument("--pr", action="store_true", help="zenn-content に PR 作成")
 
     sub.add_parser("check", help="接続確認")
