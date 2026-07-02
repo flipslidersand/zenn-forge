@@ -9,11 +9,12 @@ def _load_prompt(name: str) -> str:
     return (PROMPTS / name).read_text(encoding="utf-8")
 
 
-def generate_outline(client: OllamaClient, topic: str, references: list[dict]) -> dict:
+def generate_outline(client: OllamaClient, topic: str, references: list[dict], template: str = "tutorial") -> dict:
     refs = "\n".join(
         f"- {r['title']} (👍{r['liked_count']})" for r in references[:5]
     )
-    prompt = _load_prompt("tutorial_outline.txt").format(topic=topic, references=refs)
+    prompt_file = f"{template}_outline.txt"
+    prompt = _load_prompt(prompt_file).format(topic=topic, references=refs)
 
     print(f"  [outline] generating for topic={topic}...")
     raw = client.generate(prompt)
@@ -33,9 +34,10 @@ def generate_outline(client: OllamaClient, topic: str, references: list[dict]) -
     return {"title": title, "emoji": emoji, "sections": sections, "raw": raw}
 
 
-def generate_body(client: OllamaClient, title: str, outline: dict) -> str:
+def generate_body(client: OllamaClient, title: str, outline: dict, template: str = "tutorial") -> str:
     outline_text = "\n".join(outline["sections"])
-    prompt = _load_prompt("tutorial_body.txt").format(
+    prompt_file = f"{template}_body.txt"
+    prompt = _load_prompt(prompt_file).format(
         title=title, outline=outline_text
     )
 

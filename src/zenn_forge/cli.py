@@ -31,7 +31,7 @@ def cmd_run(args: argparse.Namespace) -> None:
             print(f"  scout DB に {topic} の記事がありません。先に zenn-scout fetch を実行してください")
             continue
 
-        outline = generate_outline(client, topic, refs)
+        outline = generate_outline(client, topic, refs, template=args.template)
         if not outline["title"]:
             print("  outline 生成失敗: タイトルが取得できませんでした")
             continue
@@ -40,7 +40,7 @@ def cmd_run(args: argparse.Namespace) -> None:
             print(f"  スキップ（既存）: {outline['title']}")
             continue
 
-        body = generate_body(client, outline["title"], outline)
+        body = generate_body(client, outline["title"], outline, template=args.template)
 
         filepath = write_article(
             content_repo,
@@ -76,6 +76,7 @@ def main() -> None:
 
     p_run = sub.add_parser("run", help="記事ドラフトを生成")
     p_run.add_argument("--topics", help="カンマ区切りトピック（省略時は config.yaml）")
+    p_run.add_argument("--template", default="tutorial", choices=["tutorial", "roadmap"], help="テンプレート種別")
     p_run.add_argument("--pr", action="store_true", help="zenn-content に PR 作成")
 
     sub.add_parser("check", help="接続確認")
